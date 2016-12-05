@@ -2,9 +2,9 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="viewport">
 
-		<title>reveal.js</title>
+		<title>Metal-Tools presentation</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
@@ -20,12 +20,88 @@
 			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
 			document.getElementsByTagName( 'head' )[0].appendChild( link );
 		</script>
+		
+		<style>
+			body {
+				background: rgb(51, 51, 51) none repeat scroll 0 0;
+			}
+		</style>
 	</head>
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+				<section>
+					<h1>Metal-Tools</h1>
+					<h3>Developer tools for Metal</h3>
+				</section>
+
+				<section data-markdown>
+					<script type="text/template">
+						## ZIP token
+						~~~~java
+private static final Token END_OF_DIR = seq("endofdir",
+	def("endofdirsignature", con(4), eq(con(0x50, 0x4b, 0x05, 0x06))),
+	def("disknumber", con(2), eqNum(con(0))),
+	def("dirdisk", con(2), eqNum(con(0))),
+	def("numlocaldirs", con(2), eqNum(count(ref("dirsignature")))),
+	def("numtotaldirs", con(2), eqNum(last(ref("numlocaldirs")))),
+	def("dirsize", con(4), eqNum(
+		sub(
+			offset(last(ref("endofdirsignature"))),
+			offset(first(ref("dirsignature")))))),
+	def("diroffset", con(4), eqNum(offset(first(ref("dirsignature"))))),
+	def("commentsize", con(2)),
+	def("comment", last(ref("commentsize"))));
+						~~~~
+					</script>
+				</section>
+				
+				<section data-markdown>
+					<script type="text/template">
+						## hexviewer
+						~~~~bash
+0000000: 504b 0304 0a00 0000 0000 b495 4b49 45df  PK..........KIE.
+0000010: 9142 0800 0000 0800 0000 0400 1c00 6461  .B............da
+0000020: 7461 5554 0900 0333 17fd 5735 17fd 5775  taUT...3..W5..Wu
+0000030: 780b 0001 040b 08e4 3b04 0b08 e43b 0747  x.......;....;.G
+0000040: 6572 746a 616e 504b 0102 1e03 0a00 0000  ertjanPK........
+0000050: 0000 b495 4b49 45df 9142 0800 0000 0800  ....KIE..B......
+0000060: 0000 0400 1800 0000 0000 0100 0000 b481  ................
+0000070: 0000 0000 6461 7461 5554 0500 0333 17fd  ....dataUT...3..
+0000080: 5775 780b 0001 040b 08e4 3b04 0b08 e43b  Wux.......;....;
+0000090: 504b 0506 0000 0000 0100 0100 4a00 0000  PK..........J...
+00000a0: 4600 0000 0000                           F.....
+						~~~~
+					</script>
+				</section>
+				
+				<section data-markdown>
+					<script type="text/template">
+						## How to generate?
+						~~~~java
+@Test
+public void testGenerateZip() throws Exception {
+	final Environment env = EnvironmentFactory.stream(uri("/data.zip"));
+	final ParseResult result = ZIP.FORMAT.parse(env, le());
+	assertTrue(result.succeeded);
+
+	JsHexViewer.generate(result.environment.order, "zip");
+}
+						~~~~
+					</script>
+				</section>
+
+				<section>
+					<h2>jsHexViewer</h2>
+					<p><a href="https://gertjanal.github.io/metal-tools/metal-tools-jshexviewer/src/main/resources/jsHexViewer/example_zip.htm?file=/metal-tools/metal-tools-jshexviewer/src/test/resources/data.zip" data-preview-link>Generate</a> an html hex viewer for the data</p>
+					<iframe data-src="https://gertjanal.github.io/metal-tools/metal-tools-jshexviewer/src/main/resources/jsHexViewer/example_zip.htm?noside=true&file=/metal-tools/metal-tools-jshexviewer/src/test/resources/data.zip" width="1200" height="220" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"> </iframe>
+				</section>
+				
+				<section>
+					<h2>jsTree</h2>
+					<p><a href="https://gertjanal.github.io/metal-tools/metal-tools-jstree/src/main/resources/jsTree/example_zip.htm" data-preview-link>Generate</a> an html tree page for the data:</p>
+					<iframe data-src="https://gertjanal.github.io/metal-tools/metal-tools-jstree/src/main/resources/jsTree/example_zip.htm" width="1200" height="100%" frameborder="1" marginwidth="0" marginheight="0" scrolling="no"> </iframe>			
+				</section>
 			</div>
 		</div>
 
@@ -36,6 +112,11 @@
 			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
 				history: true,
+				width: "100%",
+				height: "100%",
+				margin: 0,
+				minScale: 1,
+				maxScale: 1,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
